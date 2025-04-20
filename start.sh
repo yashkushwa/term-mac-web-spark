@@ -4,9 +4,10 @@
 # Colors for terminal output
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-echo -e "${YELLOW}Starting Web Terminal...${NC}"
+echo -e "${YELLOW}Starting macOS Web Terminal...${NC}"
 
 # Function to check if a command exists
 command_exists() {
@@ -36,14 +37,26 @@ fi
 # Check if Docker is available - prefer Docker if available
 if command_exists docker; then
   echo -e "${GREEN}Docker found. Starting with Docker...${NC}"
-  docker build -t web-terminal .
-  docker run -p 8080:8080 web-terminal
+  
+  if command_exists docker-compose; then
+    echo -e "${GREEN}Using docker-compose to build and run containers...${NC}"
+    docker-compose up --build
+  else
+    echo -e "${GREEN}Building the Docker image...${NC}"
+    docker build -t macos-web-terminal .
+    
+    echo -e "${GREEN}Running the container...${NC}"
+    docker run -p 8080:8080 macos-web-terminal
+  fi
+  
   exit 0
 fi
 
 # If Docker is not available, run with Python
+echo -e "${GREEN}Docker not found. Using Python directly...${NC}"
 echo -e "${GREEN}Installing Python dependencies...${NC}"
 $PIP install -r requirements.txt
 
 echo -e "${GREEN}Starting Flask server...${NC}"
+echo -e "${GREEN}Open your browser at http://localhost:8080${NC}"
 $PYTHON app.py

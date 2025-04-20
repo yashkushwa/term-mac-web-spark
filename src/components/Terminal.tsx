@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Terminal as XTerm } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
+import { WebLinksAddon } from 'xterm-addon-web-links';
 import { io, Socket } from 'socket.io-client';
 import 'xterm/css/xterm.css';
 
@@ -17,6 +18,8 @@ const Terminal: React.FC<TerminalProps> = ({ className = "" }) => {
   const fitAddonRef = useRef<FitAddon>(new FitAddon());
   const [isConnected, setIsConnected] = useState(false);
   const [isTerminalCreated, setIsTerminalCreated] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   
   // Initialize terminal
   useEffect(() => {
@@ -34,18 +37,45 @@ const Terminal: React.FC<TerminalProps> = ({ className = "" }) => {
         cursor: '#aeafad',
         cursorAccent: '#1e1e1e',
         selectionBackground: 'rgba(255, 255, 255, 0.3)',
+        black: '#000000',
+        red: '#cd3131',
+        green: '#0dbc79',
+        yellow: '#e5e510',
+        blue: '#2472c8',
+        magenta: '#bc3fbc',
+        cyan: '#11a8cd',
+        white: '#e5e5e5',
+        brightBlack: '#666666',
+        brightRed: '#f14c4c',
+        brightGreen: '#23d18b',
+        brightYellow: '#f5f543',
+        brightBlue: '#3b8eea',
+        brightMagenta: '#d670d6',
+        brightCyan: '#29b8db',
+        brightWhite: '#e5e5e5',
       },
       fontFamily: 'Menlo, Monaco, "Courier New", monospace',
       fontSize: 14,
       lineHeight: 1.2,
       allowProposedApi: true,
       scrollback: 5000,
+      smoothScrollDuration: 300,
     });
     
     term.loadAddon(fitAddonRef.current);
+    
+    // Add web links addon for clickable links
+    const webLinksAddon = new WebLinksAddon();
+    term.loadAddon(webLinksAddon);
+    
     term.open(terminalRef.current);
     fitAddonRef.current.fit();
     setTerminal(term);
+    
+    term.writeln('\x1b[1;32m╭────────────────────────────────────────────╮\x1b[0m');
+    term.writeln('\x1b[1;32m│       macOS Web Terminal v1.0.0             │\x1b[0m');
+    term.writeln('\x1b[1;32m│       Connecting to server...               │\x1b[0m');
+    term.writeln('\x1b[1;32m╰────────────────────────────────────────────╯\x1b[0m');
     
     return () => {
       term.dispose();
@@ -54,6 +84,10 @@ const Terminal: React.FC<TerminalProps> = ({ className = "" }) => {
   
   // Initialize socket connection
   useEffect(() => {
+    if (!terminal) return;
+    
+    console.log("Attempting to connect to WebSocket server...");
+    
     const socketInstance = io(`${window.location.protocol}//${window.location.hostname}:${window.location.port}`, {
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
@@ -63,17 +97,33 @@ const Terminal: React.FC<TerminalProps> = ({ className = "" }) => {
     socketInstance.on('connect', () => {
       setIsConnected(true);
       console.log('Socket connected');
+      terminal.clear();
+      terminal.writeln('\x1b[1;32m╭────────────────────────────────────────────╮\x1b[0m');
+      terminal.writeln('\x1b[1;32m│       macOS Web Terminal v1.0.0             │\x1b[0m');
+      terminal.writeln('\x1b[1;32m│       Connected to server!                  │\x1b[0m');
+      terminal.writeln('\x1b[1;32m╰────────────────────────────────────────────╯\x1b[0m');
+      terminal.writeln('');
     });
     
     socketInstance.on('disconnect', () => {
       setIsConnected(false);
+      setIsTerminalCreated(false);
       console.log('Socket disconnected');
+      terminal.writeln('\r\n\x1b[31mDisconnected from server. Trying to reconnect...\x1b[0m\r\n');
     });
     
     socketInstance.on('connect_error', (error) => {
       console.error('Socket connection error:', error);
+      setIsError(true);
+      setErrorMessage(error.message);
+      
       if (terminal) {
-        terminal.write('\r\n\x1b[31mConnection error. Please check if the server is running.\x1b[0m\r\n');
+        terminal.writeln('\r\n\x1b[31mConnection error. Please check if the server is running.\x1b[0m');
+        terminal.writeln('\x1b[31mError: ' + error.message + '\x1b[0m\r\n');
+        terminal.writeln('\x1b[33mMake sure the Flask server is running with:\x1b[0m');
+        terminal.writeln('\x1b[36m  python app.py\x1b[0m');
+        terminal.writeln('\x1b[33mOr using Docker:\x1b[0m');
+        terminal.writeln('\x1b[36m  docker-compose up\x1b[0m\r\n');
       }
     });
     
@@ -98,6 +148,8 @@ const Terminal: React.FC<TerminalProps> = ({ className = "" }) => {
         if (response && response.success) {
           setIsTerminalCreated(true);
           console.log('Terminal session created');
+        } else {
+          terminal.writeln('\r\n\x1b[31mFailed to create terminal session.\x1b[0m\r\n');
         }
       });
     };
