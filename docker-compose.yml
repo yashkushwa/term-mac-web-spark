@@ -1,0 +1,25 @@
+
+version: '3'
+
+services:
+  web-terminal:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./:/app
+    environment:
+      - FLASK_ENV=development
+    restart: unless-stopped
+
+  # Uncomment if you want a separate frontend development server
+  # frontend:
+  #   image: node:18
+  #   volumes:
+  #     - ./:/app
+  #   working_dir: /app
+  #   command: npm run dev
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - NODE_ENV=development

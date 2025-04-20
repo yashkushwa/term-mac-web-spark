@@ -1,73 +1,114 @@
-# Welcome to your Lovable project
 
-## Project info
+# macOS Web Terminal
 
-**URL**: https://lovable.dev/projects/ff89ace4-a53b-4990-86fd-cbf84db7c02e
+A beautiful macOS-style terminal in your browser, powered by Flask and xterm.js.
 
-## How can I edit this code?
+![macOS Web Terminal Screenshot](screenshot.png)
 
-There are several ways of editing your application.
+## Features
 
-**Use Lovable**
+- 🖥️ macOS-style terminal interface that looks like the real thing
+- 🐍 Flask backend for executing real terminal commands
+- 📦 xterm.js for accurate terminal emulation
+- 🔌 Real-time communication via WebSockets
+- 🧩 Fully responsive design for any screen size
+- 🔒 Runs in a secure container
+- 🚀 Easy to set up and use
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/ff89ace4-a53b-4990-86fd-cbf84db7c02e) and start prompting.
+## Quick Start
 
-Changes made via Lovable will be committed automatically to this repo.
+### The Easiest Way (Using the start script)
 
-**Use your preferred IDE**
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/macos-web-terminal.git
+cd macos-web-terminal
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+# Make the start script executable
+chmod +x start.sh
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+# Run the start script (will automatically use Docker if available)
+./start.sh
 ```
 
-**Edit a file directly in GitHub**
+### Option 1: Run with Docker (Recommended)
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/macos-web-terminal.git
+cd macos-web-terminal
 
-**Use GitHub Codespaces**
+# Using docker-compose (easiest)
+docker-compose up
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+# OR build and run manually
+docker build -t macos-web-terminal .
+docker run -p 8080:8080 macos-web-terminal
+```
 
-## What technologies are used for this project?
+### Option 2: Run locally (without Docker)
 
-This project is built with:
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/macos-web-terminal.git
+cd macos-web-terminal
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+# Install the Python dependencies
+pip install -r requirements.txt
 
-## How can I deploy this project?
+# Run the app
+python app.py
+```
 
-Simply open [Lovable](https://lovable.dev/projects/ff89ace4-a53b-4990-86fd-cbf84db7c02e) and click on Share -> Publish.
+Then visit `http://localhost:8080` in your browser.
 
-## Can I connect a custom domain to my Lovable project?
+## How It Works
 
-Yes, you can!
+The application consists of:
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+1. **Backend**: A Flask server that creates real terminal sessions using Python's pty module
+2. **Frontend**: A React application with xterm.js that provides the terminal UI
+3. **WebSockets**: For real-time communication between the frontend and backend
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+When you type in the terminal, your keystrokes are sent to the Flask backend, which forwards them to a real terminal session. The output is then sent back to the browser and displayed in the terminal UI.
+
+## Development
+
+### Frontend
+
+The frontend is built with React, TypeScript, and Tailwind CSS:
+
+```bash
+# Install dependencies
+npm install
+
+# Run development server (if you're working on the frontend only)
+npm run dev
+
+# Build for production
+npm run build
+```
+
+### Backend
+
+The backend is a Flask application with WebSockets support:
+
+```bash
+# Install development dependencies
+pip install -r requirements.txt
+
+# Run with debug mode
+FLASK_ENV=development python app.py
+```
+
+## Security Considerations
+
+This application provides access to a real terminal in your browser. When deployed in production:
+
+- Consider adding authentication
+- Restrict commands that can be executed
+- Run in a container with limited permissions
+
+## License
+
+MIT
