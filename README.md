@@ -50,7 +50,7 @@ docker run -p 8080:8080 macos-web-terminal
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/macos-web-terminal.git
+git clone https://github.com/yashkushwa/term-mac-web-spark
 cd macos-web-terminal
 
 # Install the Python dependencies
